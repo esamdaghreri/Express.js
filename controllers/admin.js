@@ -9,20 +9,33 @@ module.exports.postAddProduct = (req, res, next) => {
     const imageURL = req.body.imageURL;
     const price = req.body.price;
     const description = req.body.description;
-    // But null for first parameter because is new product and it will create new one not update a particular product.
-    const product = new Product(null, title, imageURL, price, description);
-    product.store();
-    res.redirect('/');
+
+    req.user.createProduct({ // creteProduct comes from the relation that has been create in app.js.
+        title: title,
+        price: price,
+        imageURL: imageURL,
+        description: description
+    }).then(result => {
+        console.log(result);
+        res.redirect('/products');
+    }).catch(error => {
+        console.log(error);
+    });
 }
 
 module.exports.getEditProduct = (req, res, next) => {
     const productId = req.params.productId;
-    Product.findById(productId, product => {
-        if(!product){
-            res.redirect('/');
-        }
-        res.render('admin/edit-product', {product: product, pageTitle: 'Edit Product', path: '/admin/edit-product'});
-    })
+    req.user
+        .getProducts({ where: {id: productId}})
+        .then(products => {
+            if(!products[0]){
+                res.redirect('/');
+            }
+            res.render('admin/edit-product', {product: products[0], pageTitle: 'Edit Product', path: '/admin/edit-product'});
+        })
+        .catch(error => {
+            console.log(error);
+        });
 }
 
 module.exports.postEditProduct = (req, res, next) => {
@@ -31,20 +44,38 @@ module.exports.postEditProduct = (req, res, next) => {
     const imageURL = req.body.imageURL;
     const price = req.body.price;
     const description = req.body.description;
-    const product = new Product(productId, title, imageURL, price, description);
-    product.store();
-    res.redirect('/admin/products');
+    Product.findByPk(productId).then(product => {
+        product.title = title;
+        product.price = price;
+        product.imageURL = imageURL;
+        product.description = description;
+        return product.save();
+    }).then(result => {
+        console.log('Updated successfully!');
+        res.redirect('/admin/products');
+    }).catch(error => {
+        console.log(error);
+    });
 }
 
 module.exports.getProducts = (req, res, next) => {
-    Product.fetchAll(products => {
-        // res.sendFile(path.join(rootDir, 'views', 'shop.html'));
-        res.render('admin/product-list', {prods: products, pageTitle: 'Products', path: '/admin/products'});
-    });
+    req.user
+        .getProducts()
+        .then(products => {
+            res.render('admin/product-list', {prods: products, pageTitle: 'Products', path: '/admin/products'});
+        }).catch(error => {
+            console.log(error);
+        });
 }
 
 module.exports.postDeleteProduct = (req, res, next) => {
     const productId = req.body.productId;
-    Product.deleteById(productId);
-    res.redirect('/admin/products');
+    Product.findByPk(productId).then(product => {
+        return product.destroy();
+    }).then(resutl => {
+        console.log('Product has been destroyed!');
+        res.redirect('/admin/products');
+    }).catch(error => {
+        console.log(error);
+    });
 }

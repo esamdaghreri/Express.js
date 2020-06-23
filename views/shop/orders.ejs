@@ -4,8 +4,37 @@
         <%- include('../includes/navigation.ejs') %>
         <main>
             <div class="container">
-                <div class="row justify-content-center">
-                    This is order page
+                <div class="row mt-5 mx-auto col-8">
+                    <% if(orders.length > 0) {%>
+                        <table class="table table-dark">
+                            <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Product</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% orders.forEach(order => {%>
+                                    <tr>
+                                        <td> <%= order.id %> </td>
+                                        <td>
+                                            <% order.products.forEach(product => {%>
+                                                <p><%= product.title%> (<%= product.orderItem.quantity%>)</p>
+                                            <% });%>
+                                        </td>
+                                    </tr>
+                                <% });%>
+                            </tbody>
+                        </table>
+                        <div class="row justify-content-center col-12">
+                            <form action="/create-order" method="post">
+                                <button type="submit" class="btn btn-primary">Order Now</button>
+                            </form>
+                        </div>
+                    <%} else {%>
+                        <p>No orders available</p>
+                    <% } %>
                 </div>
             </div>
         </main>
