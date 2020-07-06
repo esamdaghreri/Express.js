@@ -3,39 +3,76 @@ const path = require('path');
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const app = express();
+const mongoose =require('mongoose');
+const session = require('express-session');
+const MongoDbStore = require('connect-mongodb-session')(session);
+const csrf = require('csurf');
+const flash = require('connect-flash');
 
 const errorsController = require('./controllers/errors');
-const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
+
+const app = express();
+
+const MONGODB_URI = ''; // uri database connection
+const store = new MongoDbStore({
+    uri: MONGODB_URI,
+    collection: 'sessions'
+});
+const csrfProtection = csrf();
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
-const adminData = require('./routes/admin');
+const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 
 
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: 'my secret hash key',
+    resave: false,
+    saveUninitialized: false,
+    store: store
+}));
 
-// Retrive a user from every request.
+// Get csrf token in all requrest
+app.use(csrfProtection);
+// Flash message using flash session
+app.use(flash());
+
 app.use((req, res, next) => {
-    User.findById('5efb4651478de9ce43a4b311')
-        .then(user => {
-            req.user = new User(user.username, user.email, user.cart, user._id);
-            next();
-        })
-        .catch(error => {
-            console.log(error);
-        });
+    if(!req.session.user) {
+        return next();
+    }
+    User.findById(req.session.user._id)
+    .then(user => {
+        req.user = user;
+        next();
+    })
+    .catch(error => {
+        console.log(error);
+    });
+})
+
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
 });
 
-app.use('/admin', adminData.routes);
+app.use('/admin', adminRoutes.routes);
 app.use(shopRoutes);
+app.use(authRoutes);
 app.use(errorsController.get404);
 
-mongoConnect( () => {
-    app.listen(3000);
-});
+mongoose.connect(MONGODB_URI)
+    .then(result => {
+        app.listen(3000);
+    })
+    .catch(error => {
+        console.log(error);
+    });

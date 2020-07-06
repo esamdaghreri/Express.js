@@ -19,16 +19,17 @@
                                     <tr>
                                         <td> <%= order._id %> </td>
                                         <td>
-                                            <% order.items.forEach(product => {%>
-                                                <p><%= product.title%> (<%= product.quantity%>)</p>
+                                            <% order.products.forEach(p => {%>
+                                                <p><%= p.product.title%> (<%= p.quantity%>)</p>
                                             <% });%>
                                         </td>
                                     </tr>
-                                <% });%>
+                                <% });%> 
                             </tbody>
                         </table>
                         <div class="row justify-content-center col-12">
                             <form action="/create-order" method="post">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken%>">
                                 <button type="submit" class="btn btn-primary">Order Now</button>
                             </form>
                         </div>

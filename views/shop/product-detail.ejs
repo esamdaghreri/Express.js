@@ -12,10 +12,13 @@
                       </div>
                       <p class="card-text"><%= product.description %></p>
                       <p class="card-text font-weight-bold"><%= product.price %> SR</p>
-                      <form action="/cart" method="post">
-                            <input type="hidden" name="productId" value="<%= product._id %>">
-                            <button type="submit" class="btn btn-primary">Add to card</button>
-                        </form>
+                        <% if(isAuthenticated) { %>
+                            <form action="/cart" method="post">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken%>">
+                                <input type="hidden" name="productId" value="<%= product._id %>">
+                                <button type="submit" class="btn btn-primary">Add to card</button>
+                            </form>
+                        <% } %>
                     </div>
                   </div>
             </div>

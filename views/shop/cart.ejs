@@ -17,11 +17,12 @@
                             <tbody>
                                 <% products.forEach(p => {%>
                                     <tr>
-                                        <td> <%= p.title %> </td>
+                                        <td> <%= p.productId.title %> </td>
                                         <td> <%= p.quantity %> </td>
                                         <td>
                                             <form action="/cart-delete-item" method="post">
-                                                <input type="hidden" name="productId" value="<%= p._id%>">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken%>">
+                                                <input type="hidden" name="productId" value="<%= p.productId._id%>">
                                                 <button type="submit" class="btn btn-danger">Delete</button>
                                             </form>
                                         </td>
@@ -31,6 +32,7 @@
                         </table>
                         <div class="row justify-content-center col-12">
                             <form action="/create-order" method="post">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken%>">
                                 <button type="submit" class="btn btn-primary">Order Now</button>
                             </form>
                         </div>

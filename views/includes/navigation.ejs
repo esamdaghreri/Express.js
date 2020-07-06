@@ -10,20 +10,37 @@
             <li class="nav-item">
                 <a href="/products" class="nav-link <%= path === '/products' ? 'active' : '' %>">Products</a>
             </li>
+        </li>
+        <% if(isAuthenticated) { %>
+                <li class="nav-item">
+                    <a href="/cart" class="nav-link <%= path === '/cart' ? 'active' : '' %>">Cart</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/orders" class="nav-link <%= path === '/orders' ? 'active' : '' %>">Orders</a>
+                <li class="nav-item">
+                    <a href="/admin/add-product" class="nav-link <%= path === '/admin/add-product' ? 'active' : '' %>">Add Product</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/products" class="nav-link <%= path === '/admin/products' ? 'active' : '' %>">Admin Products</a>
+                </li>
+            <% } %>
+        </ul>
+        <ul class="navbar-nav ml-auto row">
+        <% if(isAuthenticated) { %>
             <li class="nav-item">
-                <a href="/cart" class="nav-link <%= path === '/cart' ? 'active' : '' %>">Cart</a>
+                <form class="form-inline" method="POST" action="/logout">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken%>">
+                    <button class="btn btn-success my-2 my-sm-0" type="submit">Logout</button>
+                </form>
+            </li>
+        <% }else { %>
+            <li class="nav-item">
+                <a href="/login" class="nav-link <%= path === '/login' ? 'active' : '' %>">Login</a>
             </li>
             <li class="nav-item">
-                <a href="/orders" class="nav-link <%= path === '/orders' ? 'active' : '' %>">Orders</a>
+                <a href="/signup" class="nav-link <%= path === '/signup' ? 'active' : '' %>">Signup</a>
             </li>
-            <li class="nav-item">
-                <a href="/admin/add-product" class="nav-link <%= path === '/admin/add-product' ? 'active' : '' %>">Add Product</a>
-            </li>
-            <li class="nav-item">
-                <a href="/admin/products" class="nav-link <%= path === '/admin/products' ? 'active' : '' %>">Admin Products</a>
-            </li>
-            <li class="nav-item">
-            </li>
+        <% } %>
         </ul>
     </div>
 </nav>

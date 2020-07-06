@@ -7,6 +7,8 @@
                 <form action="/admin/edit-product" method="POST" class="mt-5 text-center">
                     <div class="form-group row">
 
+                        <input type="hidden" name="_csrf" value="<%= csrfToken%>">
+
                         <label for="title" class="col-12 col-lg-2 col-form-label">Title for Product</label>
                         <div class="col-12 col-lg-10 mb-4">
                             <input type="text" name="title" class="form-control" placeholder="Title" id="title" value="<%= product.title%>">
