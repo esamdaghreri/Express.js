@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
+// This package get error when add validation in route folder
+const { validationResult } = require('express-validator/check');
 
 const crypto = require('crypto');
 
@@ -22,7 +24,9 @@ module.exports.getLogin = (req, res, next) => {
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
-        errorMessage: message
+        errorMessage: message,
+        oldInput: {email: ""},
+        validationErrors: []
     });
 };
 
@@ -30,11 +34,29 @@ module.exports.postLogin = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
 
+    const errors = validationResult(req);
+
+    if(!errors.isEmpty()) {
+        // 422 is status false for validation
+        return res.status(422).render('auth/login', {
+            path: '/login',
+            pageTitle: 'Login',
+            errorMessage: errors.array()[0].msg,
+            oldInput: {email: email},
+            validationErrors: errors.array()
+        });
+    }
+
     User.findOne( {email: email} )
         .then(user => {
             if(!user){
-                req.flash('error', 'Invalid email or password');
-                return res.redirect('/login');
+                return res.status(422).render('auth/login', {
+                    path: '/login',
+                    pageTitle: 'Login',
+                    errorMessage: 'Invalid email or password',
+                    oldInput: {email: email},
+                    validationErrors: [{param: 'email'}]
+                });
             }
             bcrypt.compare(password, user.password)
                 .then(match => {
@@ -46,8 +68,13 @@ module.exports.postLogin = (req, res, next) => {
                             return res.redirect('/');
                         });
                     }
-                    req.flash('error', 'Invalid email or password');
-                    res.redirect('/login');
+                    res.status(422).render('auth/login', {
+                    path: '/login',
+                    pageTitle: 'Login',
+                    errorMessage: 'Invalid email or password',
+                    oldInput: {email: email},
+                    validationErrors: [{param: 'email'}]
+                    });
                 })
                 .catch(error => {
                     console.log(error);
@@ -69,47 +96,51 @@ module.exports.getSignup = (req, res, next) => {
     res.render('auth/signup', {
         path: '/signup',
         pageTitle: 'Signup',
-        errorMessage: message
+        errorMessage: message,
+        oldInput: {email: ""},
+        validationErrors: []
     });
 };
 
 module.exports.postSignup = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
-    const confirmePassword = req.body.confirmePassword;
+    const errors = validationResult(req);
 
-    User.findOne( { email: email } )
-        .then(userDoc => {
-            if(userDoc){
-                req.flash('error', 'E-mail is already exist!');
-                return res.redirect('/signup');
-            }
-            return bcrypt
-                .hash(password, 12)
-                .then(hashPassword => {
-                    const user = new User({
-                        email: email,
-                        password: hashPassword,
-                        cart: { items: [] }
-                    });
-                    return user.save();
-                })
-                .then(result => {
-                    res.redirect('/login');
-                    return transporter.sendMail({
-                        to: email,
-                        from: 'esam@test.com',
-                        subject: 'Signup Succeeded!',
-                        html: '<h1>You successfully signed up!</h1>'
-                    });
-                })
-                .catch(error => {
-                    console.log(error);
-                });
-            })
+    if(!errors.isEmpty()) {
+        // 422 is status false for validation
+        console.log(errors.array())
+        return res.status(422).render('auth/signup', {
+            path: '/signup',
+            pageTitle: 'Signup',
+            errorMessage: errors.array()[0].msg,
+            oldInput: {email: email},
+            validationErrors: errors.array()
+        });
+    }
+
+    bcrypt
+        .hash(password, 12)
+        .then(hashPassword => {
+            const user = new User({
+                email: email,
+                password: hashPassword,
+                cart: { items: [] }
+            });
+            return user.save();
+        })
+        .then(result => {
+            res.redirect('/login');
+            return transporter.sendMail({
+                to: email,
+                from: 'esam@test.com',
+                subject: 'Signup Succeeded!',
+                html: '<h1>You successfully signed up!</h1>'
+            });
+        })
         .catch(error => {
             console.log(error);
-        });
+        })
 };
 
 module.exports.postLogout = (req, res, next) => {

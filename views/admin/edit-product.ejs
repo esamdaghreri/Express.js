@@ -11,24 +11,24 @@
 
                         <label for="title" class="col-12 col-lg-2 col-form-label">Title for Product</label>
                         <div class="col-12 col-lg-10 mb-4">
-                            <input type="text" name="title" class="form-control" placeholder="Title" id="title" value="<%= product.title%>">
+                            <input type="text" name="title" class="form-control <%= validationErrors.find(e => e.param === 'title') ? 'invalid' : ''%>" placeholder="Title" id="title"  value="<%= oldInput.title%>">
                         </div>
 
                         <label for="imageURL" class="col-12 col-lg-2 col-form-label">Image URL</label>
                         <div class="col-12 col-lg-10 mb-4">
-                            <input type="text" name="imageURL" class="form-control" placeholder="Image URL" id="imageURL" value="<%= product.imageURL%>">
+                            <input type="text" name="imageURL" class="form-control <%= validationErrors.find(e => e.param === 'imageURL') ? 'invalid' : ''%>" placeholder="Image URL" id="imageURL"  value="<%= oldInput.imageURL%>">
                         </div>
 
                         <label for="price" class="col-12 col-lg-2 col-form-label">Price</label>
                         <div class="col-12 col-lg-10 mb-4">
-                            <input type="number" name="price" class="form-control" placeholder="price" id="price" value="<%= product.price%>">
+                            <input type="number" name="price" class="form-control <%= validationErrors.find(e => e.param === 'price') ? 'invalid' : ''%>" placeholder="price" id="price" step="0.01"  value="<%= oldInput.price%>">
                         </div>
 
                         <label for="description" class=" col-12 col-lg-2 col-form-label my-auto">Description</label>
                         <div class="col-12 col-lg-10 mb-4">
-                            <textarea name="description" class="form-control" placeholder="Description" id="description" rows="5"><%= product.description%></textarea>
+                            <textarea name="description" class="form-control <%= validationErrors.find(e => e.param === 'description') ? 'invalid' : ''%>" placeholder="Description" id="description" rows="5"><%= oldInput.description%></textarea>
                         </div>
-                        <input type="hidden" name="productId" value="<%= product._id%>">
+                        <input type="hidden" name="productId" value="<%= oldInput.productId%>">
                     </div>
                     <button class="btn btn-primary" type="submit">Update Product</button>
                 </form>
