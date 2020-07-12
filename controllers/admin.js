@@ -1,4 +1,6 @@
 const mongodb = require('mongodb');
+const mongoose = require('mongoose');
+
 const {validationResult} = require('express-validator/check');
 
 const Product = require('../models/product');
@@ -46,13 +48,21 @@ module.exports.postAddProduct = (req, res, next) => {
             );
     }
 
-    const product = new Product({title: title, price: price, imageURL: imageURL, description: description, userId: req.session.user});
+    const product = new Product({
+        title: title,
+        price: price,
+        imageURL: imageURL,
+        description: description,
+        userId: req.session.user
+    });
     product.save()
         .then(result => {
             console.log('Product has been added successfully.')
             res.redirect('/products');
         }).catch(error => {
-            console.log(error);
+            const err = new Error(error);
+            err.httpStatusCode = 500;
+            return next(err);
         });
 }
 
@@ -81,7 +91,9 @@ module.exports.getEditProduct = (req, res, next) => {
             );
         })
         .catch(error => {
-            console.log(error);
+            const err = new Error(error);
+            err.httpStatusCode = 500;
+            return next(err);
         });
 }
 
@@ -128,7 +140,9 @@ module.exports.postEditProduct = (req, res, next) => {
                 })
         })
         .catch(error => {
-            console.log(error);
+            const err = new Error(error);
+            err.httpStatusCode = 500;
+            return next(err);
         });
 }
 
@@ -137,7 +151,9 @@ module.exports.getProducts = (req, res, next) => {
         .then(products => {
             res.render('admin/product-list', {prods: products, pageTitle: 'Products', path: '/admin/products'});
         }).catch(error => {
-            console.log(error);
+            const err = new Error(error);
+            err.httpStatusCode = 500;
+            return next(err);
         });
 }
 
@@ -147,6 +163,8 @@ module.exports.postDeleteProduct = (req, res, next) => {
         .then(() => {
             res.redirect('/admin/products');
         }).catch(error => {
-            console.log(error);
+            const err = new Error(error);
+            err.httpStatusCode = 500;
+            return next(err);
         });
 }

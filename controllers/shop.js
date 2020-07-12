@@ -12,7 +12,9 @@ module.exports.getProducts = (req, res, next) => {
         .then(products => {
             res.render('shop/product-list', {prods: products, pageTitle: 'Products', path: '/products'});
         }).catch(error => {
-            console.log(error);
+            const err = new Error(error);
+            err.httpStatusCode = 500;
+            return next(err);
         });
 }
 
@@ -21,7 +23,11 @@ module.exports.getProduct = (req, res, next) => {
     let product;
     Product.findById(prodId).then(product => {
         res.render('shop/product-detail', {product: product, pageTitle: product.title, path: '/products'});
-    }).catch(error => console.log(error));
+    }).catch(error => {
+        const err = new Error(error);
+        err.httpStatusCode = 500;
+        return next(err);
+    });
 }
 
 module.exports.getCart = (req, res, next) => {
@@ -33,7 +39,9 @@ module.exports.getCart = (req, res, next) => {
             res.render('shop/cart', { pageTitle: 'Your Cart', path: '/cart', products: products });
         })
         .catch(error => {
-            console.log(error);
+            const err = new Error(error);
+            err.httpStatusCode = 500;
+            return next(err);
         });
 }
 
@@ -47,7 +55,9 @@ module.exports.postCart = (req, res, next) => {
             res.redirect('/cart');
         })
         .catch(error => {
-            console.log(error);
+            const err = new Error(error);
+            err.httpStatusCode = 500;
+            return next(err);
         });
 }
 
@@ -59,7 +69,9 @@ module.exports.postCartDeleteProduct = (req, res, next) => {
             res.redirect('/cart');
         })
         .catch(error => {
-            console.log(error);
+            const err = new Error(error);
+            err.httpStatusCode = 500;
+            return next(err);
         });
 };
 
@@ -88,7 +100,9 @@ module.exports.postOrder = (req, res, next) => {
         res.redirect('/orders');
     })
     .catch(error => {
-        console.log(error);
+        const err = new Error(error);
+        err.httpStatusCode = 500;
+        return next(err);
     });
 };
 
@@ -98,6 +112,8 @@ module.exports.getOrders = (req, res, next) => {
             res.render('shop/orders', {pageTitle: 'Your Orders', path: '/orders', orders: orders});
         })
         .catch(error => {
-            console.log(error);
+            const err = new Error(error);
+            err.httpStatusCode = 500;
+            return next(err);
         });
 }
