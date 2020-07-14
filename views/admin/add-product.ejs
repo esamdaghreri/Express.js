@@ -5,7 +5,7 @@
         <main>
             <div class="container">
                 <%- include('../includes/errors.ejs') %>
-                <form action="/admin/add-product" method="POST" class="mt-5 text-center">
+                <form action="/admin/add-product" method="POST" class="mt-5 text-center" enctype="multipart/form-data">
                     <div class="form-group row">
 
                         <input type="hidden" name="_csrf" value="<%= csrfToken%>">
@@ -15,9 +15,10 @@
                             <input type="text" name="title" class="form-control <%= validationErrors.find(e => e.param === 'title') ? 'invalid' : ''%>" placeholder="Title" id="title"  value="<%= oldInput.title%>">
                         </div>
 
-                        <label for="imageURL" class="col-12 col-lg-2 col-form-label">Image URL</label>
-                        <div class="col-12 col-lg-10 mb-4">
-                            <input type="text" name="imageURL" class="form-control <%= validationErrors.find(e => e.param === 'imageURL') ? 'invalid' : ''%>" placeholder="Image URL" id="imageURL"  value="<%= oldInput.imageURL%>">
+                        <label for="image" class="col-12 col-lg-2 col-form-label">Image</label>
+                        <div class="col-12 col-lg-10 mb-4 custom-file">
+                            <input type="file" name="image" class="custom-file-input" id="customFile">
+                            <label class="custom-file-label col-12" for="customFile">Choose image</label>
                         </div>
 
                         <label for="price" class="col-12 col-lg-2 col-form-label">Price</label>

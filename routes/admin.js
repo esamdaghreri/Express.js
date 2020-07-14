@@ -18,8 +18,6 @@ router.post(
         .isString()
         .isLength({min: 3, max: 50})
         .trim(),
-        body('imageURL')
-        .isURL(),
         body('price')
         .isFloat(),
         body('description')
@@ -55,7 +53,6 @@ router.post(
     isAuth,
     [
         body('title').isString().isLength({min: 3, max: 50}).trim(),
-        body('imageURL').isURL(),
         body('price').isFloat(),
         body('description').isString().isLength({min: 3}).trim()
     ],

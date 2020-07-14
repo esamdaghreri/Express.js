@@ -21,14 +21,33 @@ module.exports.getAddProduct = (req, res, next) => {
         errorMessage: null,
         validationErrors: []
     });
-}
+};
 
 module.exports.postAddProduct = (req, res, next) => {
     const title = req.body.title;
-    const imageURL = req.body.imageURL;
+    const image = req.file;
     const price = req.body.price;
     const description = req.body.description;
     const errors = validationResult(req);
+    if(!image) {
+        return res.status(422).render(
+            'admin/add-product',
+            {
+                pageTitle: 'Add Product',
+                path: '/admin/add-product',
+                errorMessage: 'Attached file is not an image.',
+                oldInput: {
+                    title: title,
+                    price: price,
+                    description: description
+                },
+                validationErrors: []
+            }
+        );
+    }
+
+    // The path of image
+    const imageURL = image.path;
 
     if(!errors.isEmpty()){
         return res.status(422).render(
@@ -39,13 +58,12 @@ module.exports.postAddProduct = (req, res, next) => {
                 errorMessage: errors.array()[0].msg,
                 oldInput: {
                     title: title,
-                    imageURL: imageURL,
                     price: price,
                     description: description
                 },
                 validationErrors: errors.array()
             }
-            );
+        );
     }
 
     const product = new Product({
@@ -64,7 +82,7 @@ module.exports.postAddProduct = (req, res, next) => {
             err.httpStatusCode = 500;
             return next(err);
         });
-}
+};
 
 module.exports.getEditProduct = (req, res, next) => {
     const productId = new mongodb.ObjectID(req.params.productId);
@@ -81,7 +99,6 @@ module.exports.getEditProduct = (req, res, next) => {
                     path: '/admin/edit-product',
                     oldInput: {
                         title: product.title,
-                        imageURL: product.imageURL,
                         price: product.price,
                         description: product.description,
                         productId: productId
@@ -95,12 +112,12 @@ module.exports.getEditProduct = (req, res, next) => {
             err.httpStatusCode = 500;
             return next(err);
         });
-}
+};
 
 module.exports.postEditProduct = (req, res, next) => {
     const productId = req.body.productId;
     const title = req.body.title;
-    const imageURL = req.body.imageURL;
+    const image = req.file;
     const price = req.body.price;
     const description = req.body.description;
     const errors = validationResult(req);
@@ -114,7 +131,6 @@ module.exports.postEditProduct = (req, res, next) => {
                 errorMessage: errors.array()[0].msg,
                 oldInput: {
                     title: title,
-                    imageURL: imageURL,
                     price: price,
                     description: description,
                     productId: productId
@@ -130,9 +146,11 @@ module.exports.postEditProduct = (req, res, next) => {
                 return res.redirect('/');
             }
             product.title = title;
-            product.imageURL = imageURL;
             product.price = price;
             product.description = description;
+            if(image){
+                product.imageURL = image.path;
+            }
             return product.save()
                 .then(result => {
                     console.log('Updated successfully!');
@@ -144,7 +162,7 @@ module.exports.postEditProduct = (req, res, next) => {
             err.httpStatusCode = 500;
             return next(err);
         });
-}
+};
 
 module.exports.getProducts = (req, res, next) => {
     Product.find({userId: req.user._id})
@@ -155,7 +173,7 @@ module.exports.getProducts = (req, res, next) => {
             err.httpStatusCode = 500;
             return next(err);
         });
-}
+};
 
 module.exports.postDeleteProduct = (req, res, next) => {
     const productId = req.body.productId;
@@ -167,4 +185,4 @@ module.exports.postDeleteProduct = (req, res, next) => {
             err.httpStatusCode = 500;
             return next(err);
         });
-}
+};
