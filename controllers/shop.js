@@ -1,4 +1,7 @@
 const mongodb = require('mongodb');
+const fs = require('fs');
+const path = require('path');
+const PDFDocumnet = require('pdfkit');
 
 const Product = require('../models/product');
 const Order = require('../models/order');
@@ -116,4 +119,60 @@ module.exports.getOrders = (req, res, next) => {
             err.httpStatusCode = 500;
             return next(err);
         });
+};
+
+module.exports.getInvoice = (req, res, next) => {
+    const orderId = req.params.orderId;
+    Order.findById(orderId)
+        .then(order => {
+            if(!order) {
+                return next(new Error('No order found'));
+            }
+            if(order.user.userId.toString() !== req.user._id.toString()) {
+                return next(new Error('Unauthorized')); 
+            }
+            const invoiceName = 'invoice-' + orderId + '.pdf';
+            const invoicePath = path.join('data', 'invoices', invoiceName);
+
+            // Using PDFKIT to generate pdf invoice with dinamic data
+            const pdfDoc = new PDFDocumnet();
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"');
+            pdfDoc.pipe(fs.createWriteStream(invoicePath));
+            pdfDoc.pipe(res);
+
+            // Write a single line
+            pdfDoc.fontSize(26).text('Invoice', {
+                underline: true
+            });
+            pdfDoc.text('---------------------------');
+            let totalPrice = 0;
+            order.products.forEach(prod => {
+                totalPrice += prod.quantity * prod.product.price;
+                pdfDoc.fontSize(16).text(`${prod.product.title} - ${prod.quantity} x $${prod.product.price}`)
+            });
+            pdfDoc.text('---------------');
+            pdfDoc.fontSize(20).text(`Total Price: $${totalPrice}`);
+            // End to write to the file
+            pdfDoc.end();
+
+            // Using this way by read file into memory is takes much more time for large file. So, it's not good way to do.
+            // fs.readFile(invoicePath, (error, data) => {
+            //     if(error) {
+            //         return next(error);
+            //     }
+            //     res.setHeader('Content-Type', 'application/pdf');
+            //     res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"');
+            //     res.send(data);
+            // });
+
+            // Streaming files is much more better that reading with big files and many requests at the same time.
+            // const file = fs.createReadStream(invoicePath);
+            // res.setHeader('Content-Type', 'application/pdf');
+            // res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"');
+            // file.pipe(res); // response is writable stream 
+        })
+        .catch(error => {
+            next(error);
+        })
 }

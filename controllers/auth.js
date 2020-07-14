@@ -64,7 +64,6 @@ module.exports.postLogin = (req, res, next) => {
                         req.session.isLoggedIn = true;
                         req.session.user = user;
                         return req.session.save((error) => {
-                            console.log(error);
                             return res.redirect('/');
                         });
                     }
@@ -77,7 +76,6 @@ module.exports.postLogin = (req, res, next) => {
                     });
                 })
                 .catch(error => {
-                    console.log(error);
                     res.redirect('/login');
                 })
         })
@@ -112,7 +110,6 @@ module.exports.postSignup = (req, res, next) => {
 
     if(!errors.isEmpty()) {
         // 422 is status false for validation
-        console.log(errors.array())
         return res.status(422).render('auth/signup', {
             path: '/signup',
             pageTitle: 'Signup',
@@ -134,12 +131,12 @@ module.exports.postSignup = (req, res, next) => {
         })
         .then(result => {
             res.redirect('/login');
-            return transporter.sendMail({
-                to: email,
-                from: 'esam@test.com',
-                subject: 'Signup Succeeded!',
-                html: '<h1>You successfully signed up!</h1>'
-            });
+            // return transporter.sendMail({
+            //     to: email,
+            //     from: 'esam@test.com',
+            //     subject: 'Signup Succeeded!',
+            //     html: '<h1>You successfully signed up!</h1>'
+            // });
         })
         .catch(error => {
             const err = new Error(error);
@@ -150,7 +147,6 @@ module.exports.postSignup = (req, res, next) => {
 
 module.exports.postLogout = (req, res, next) => {
     req.session.destroy((error) => {
-        console.log(error)
         res.redirect('/');
     });
 };
@@ -173,7 +169,6 @@ module.exports.getReset = (req, res, next) => {
 module.exports.postReset = (req, res, next) => {
     crypto.randomBytes(32, (error, buffer) => {
         if(error) {
-            console.log(error);
             return res.redirect('/reset');
         }
         const token = buffer.toString('hex');

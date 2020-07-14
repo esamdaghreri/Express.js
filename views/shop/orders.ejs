@@ -17,7 +17,7 @@
                             <tbody>
                                 <% orders.forEach(order => {%>
                                     <tr>
-                                        <td> <%= order._id %> </td>
+                                        <td> <%= order._id %> - <a href="/orders/<%=order.id%>" class="btn btn-primary">Invoice</a></td>
                                         <td>
                                             <% order.products.forEach(p => {%>
                                                 <p><%= p.product.title%> (<%= p.quantity%>)</p>
@@ -27,12 +27,6 @@
                                 <% });%> 
                             </tbody>
                         </table>
-                        <div class="row justify-content-center col-12">
-                            <form action="/create-order" method="post">
-                                <input type="hidden" name="_csrf" value="<%= csrfToken%>">
-                                <button type="submit" class="btn btn-primary">Order Now</button>
-                            </form>
-                        </div>
                     <%} else {%>
                         <p>No orders available</p>
                     <% } %>
