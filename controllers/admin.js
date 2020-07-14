@@ -6,6 +6,8 @@ const {validationResult} = require('express-validator/check');
 const Product = require('../models/product');
 const fileHelper = require('../util/file');
 
+const ITEMS_PER_PAGE = 8;
+
 module.exports.getAddProduct = (req, res, next) => {
     if(!req.session.isLoggedIn){
         return res.redirect('/login');
@@ -167,9 +169,31 @@ module.exports.postEditProduct = (req, res, next) => {
 };
 
 module.exports.getProducts = (req, res, next) => {
+    const page = +req.query.page || 1;
+    let totalItems;
+
     Product.find({userId: req.user._id})
+        .countDocuments()
+        .then(numProducts => {
+            totalItems = numProducts;
+            return Product.find()
+                .skip((page - 1) * ITEMS_PER_PAGE)
+                .limit(ITEMS_PER_PAGE);
+        })
         .then(products => {
-            res.render('admin/product-list', {prods: products, pageTitle: 'Products', path: '/admin/products'});
+            res.render('admin/product-list',
+            {
+                prods: products,
+                pageTitle: 'Products',
+                path: '/admin/products',
+                currentPage: page,
+                hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+                hasPreviousPage: page > 1,
+                nextPage: page + 1,
+                previousPage: page - 1,
+                lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
+            }
+        );
         }).catch(error => {
             const err = new Error(error);
             err.httpStatusCode = 500;
