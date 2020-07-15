@@ -7,7 +7,7 @@
                 <% if(prods.length > 0) { %>
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 justify-content-center">
                         <% for(var product of prods){ %>
-                            <div class="col mt-3">
+                            <div class="col mt-3 product-cart">
                                 <div class="card text-center h-100">
                                     <img class="card-img-top" src="/<%= product.imageURL%>" alt="book">
                                     <div class="card-body">
@@ -17,22 +17,21 @@
                                     <p class="font-weight-bold">Price: <%= product.price%> SR</p>
                                     <div class="row justify-content-around mb-4">
                                         <a href="/admin/edit-product/<%= product._id %>" class="btn btn-primary">Edit</a>
-                                        <form action="/admin/delete-product" method="POST">
-                                            <input type="hidden" name="_csrf" value="<%= csrfToken%>">
-                                            <input type="hidden" name="productId" value="<%= product._id %>">
-                                            <button type="submit"class="btn btn-danger">Delete</button>
-                                        </form>
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken%>">
+                                        <input type="hidden" name="productId" value="<%= product._id %>">
+                                        <button type="button"class="btn btn-danger" onclick="deleteProduct(this)">Delete</button>
                                     </div>
                                 </div>
                             </div>
                             <% } %>
                         </div>
                         <%- include('../includes/products-pagination.ejs') %>
-                <% }else{ %>
+                <% }else{ %>  
                     <div class="row text-center col-12">
                         <p class="col-12">No product available</p>
                     </div>
                 <% } %>
             </div>
         </main>
+        <script src="/js/admin.js"></script>
 <%- include('../includes/end.ejs') %>
